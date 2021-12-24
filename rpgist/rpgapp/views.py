@@ -1,9 +1,11 @@
 from django.shortcuts import render,redirect
-from .models import Personagem,Habs,User
+from .models import Personagem,Habs,User2
 from django.http import HttpResponse
 from django.contrib.auth import logout
 from .forms import CharacterForm,LogUser,CreateHabForm
 from hashlib import md5
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 from django.shortcuts import get_object_or_404
 def index(request):
     data = Personagem.objects.all()
@@ -24,17 +26,15 @@ def character_creator(request):
 def Login(request):
     if request.method == 'POST':
         form = LogUser(request.POST)
-        name = request.POST.get('name', '')
-        password = request.POST.get('password', '')
-        password = md5(password.encode())
-        password = password.hexdigest()
-        try:
-          value = User.objects.get(password=password)
-          print(password)
-        except:
-            value = None
-        if value is not None:
-           request.session['user'] = 'admin'
+        name = request.POST['name']
+        password = request.POST['password']
+        user = authenticate(request,username=name, password=password)
+        if user is not None:
+            login(request,user)
+            print('nhe')
+            redirect('/')
+        else:
+            redirect('/nhe')
     else:
         form = LogUser()
     return render(request, 'app/Login.html', {'form': form})
